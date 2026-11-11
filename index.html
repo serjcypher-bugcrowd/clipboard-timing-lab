@@ -16,6 +16,7 @@
 </style>
 
 <h1>Clipboard read timing lab</h1>
+<div class="sum" id="who">client: …</div>
 <p>Measures how many <code>readTextFromClipboard</code> calls return data after
 <strong>one</strong> tap of the button, over a 10&nbsp;second window.</p>
 <p>Copy some different text while the window runs, to see which values a single tap reaches.</p>
@@ -29,6 +30,13 @@
 const WebApp = window.Telegram?.WebApp;
 WebApp?.ready();
 WebApp?.expand();
+
+// Identify the client in the screenshot itself, so a result can never be attributed
+// to the wrong one. platform is 'tdesktop' | 'macos' | 'ios' | 'android' | 'weba' | 'webk'.
+document.getElementById('who').textContent =
+  'client: ' + (WebApp?.platform || 'unknown')
+  + ' · Bot API ' + (WebApp?.version || '?')
+  + ' · ' + (navigator.platform || '');
 
 const INTERVAL_MS = 400;     // one call per 400 ms
 const WINDOW_MS   = 10000;   // the documented interaction window
