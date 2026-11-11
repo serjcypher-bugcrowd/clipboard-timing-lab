@@ -20,6 +20,7 @@
 <strong>one</strong> tap of the button, over a 10&nbsp;second window.</p>
 <p>Copy some different text while the window runs, to see which values a single tap reaches.</p>
 
+<div class="sum" id="ctl">Control (no tap yet): running…</div>
 <button id="go">Run (tap once)</button>
 <div class="sum" id="sum">Not started.</div>
 <table id="t"><thead><tr><th>#</th><th>t+ms</th><th>data</th></tr></thead><tbody></tbody></table>
@@ -42,6 +43,28 @@ function row(n, dt, data){
   tr.innerHTML = '<td>'+n+'</td><td>'+dt+'</td><td class="v">'+shown+'</td>';
   tb.appendChild(tr);
 }
+
+// CONTROL: three calls on load, before the button is ever tapped. If the gate works,
+// every one of these must come back null. Without this row a reader cannot tell
+// "one tap authorised many reads" from "reads were never gated at all".
+(function control(){
+  if (!WebApp?.readTextFromClipboard) {
+    document.getElementById('ctl').textContent = 'Control: readTextFromClipboard unavailable.';
+    return;
+  }
+  let done = 0, withData = 0;
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      WebApp.readTextFromClipboard((data) => {
+        done++;
+        if (data !== null && data !== undefined) withData++;
+        document.getElementById('ctl').textContent =
+          'Control before any tap: ' + done + ' calls · ' + withData + ' returned data'
+          + (done === 3 ? (withData === 0 ? ' — gate holds with no interaction' : ' — NOT GATED') : '');
+      });
+    }, 300 * (i + 1));
+  }
+})();
 
 document.getElementById('go').addEventListener('click', () => {
   if (running) return;
